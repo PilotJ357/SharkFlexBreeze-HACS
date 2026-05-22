@@ -1,0 +1,67 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "This fan is already configured.",
+      "no_compatible_transmitters": "No RF transmitter supporting 433.92 MHz OOK found. Add an ESPHome CC1101 or Broadlink RM4 Pro first.",
+      "cancelled": "Setup cancelled."
+    },
+    "error": {
+      "invalid_fan_id": "Fan ID must be exactly 6 hexadecimal characters (e.g. 0e37ee)."
+    },
+    "step": {
+      "user": {
+        "title": "Add Shark Flex Breeze Fan",
+        "data": {
+          "transmitter": "RF Transmitter",
+          "fan_name": "Fan name"
+        },
+        "data_description": {
+          "transmitter": "The RF transmitter entity that will send commands to this fan.",
+          "fan_name": "A friendly name for this fan (e.g. Bedroom Fan)."
+        }
+      },
+      "fan_id": {
+        "title": "Select Fan ID",
+        "description": "Choose a previously captured fan ID or enter a new one.",
+        "data": {
+          "fan_id_choice": "Fan ID"
+        }
+      },
+      "manual_id": {
+        "title": "Enter Fan ID Manually",
+        "description": "Run `scripts/get_fan_id.sh` to capture your fan's 6-character hex ID from your remote.",
+        "data": {
+          "fan_id": "Fan ID (6 hex characters)"
+        }
+      },
+      "test": {
+        "title": "Test Connection",
+        "description": "A power command has been sent to **{fan_name}**. Did the fan respond?\n\nIf not, check that the transmitter is within range and that the fan ID is correct."
+      },
+      "confirm": {
+        "title": "Add Fan",
+        "description": "Ready to add **{fan_name}** (ID: `{fan_id}`) via `{transmitter}`."
+      }
+    }
+  },
+  "entity": {
+    "fan": {
+      "shark_flex_breeze_fan": {
+        "state_attributes": {
+          "preset_mode": {
+            "state": {
+              "Normal": "Normal",
+              "Turbo": "Turbo"
+            }
+          }
+        }
+      }
+    },
+    "button": {
+      "reset_state": {
+        "name": "Reset State",
+        "description": "Resets assumed state to off. Use after physically powering the fan off so HA re-syncs — next turn on will start from speed 1."
+      }
+    }
+  }
+}

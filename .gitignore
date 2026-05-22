@@ -1,0 +1,6 @@
+.DS_Store
+beta-testing/captures/
+beta-testing/*.cu8
+__pycache__/
+*.pyc
+.env

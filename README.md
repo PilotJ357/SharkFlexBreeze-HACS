@@ -1,0 +1,187 @@
+# Shark Flex Breeze
+
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
+[![GitHub Release](https://img.shields.io/github/v/release/PilotJ357/SharkFlexBreeze-HACS?style=flat-square)](https://github.com/PilotJ357/SharkFlexBreeze-HACS/releases)
+[![HA Version](https://img.shields.io/badge/Home%20Assistant-2026.5%2B-blue?style=flat-square)](https://www.home-assistant.io/)
+[![License](https://img.shields.io/github/license/PilotJ357/SharkFlexBreeze-HACS?style=flat-square)](LICENSE)
+
+_Control SharkFlexBreeze tower fans from Home Assistant via 433 MHz RF — no cloud, no hub, just a cheap SDR and a transmitter._
+
+---
+
+<!-- TOC -->
+* [Installation](#installation)
+* [Setup](#setup)
+* [Features](#features)
+* [Hardware](#hardware)
+* [Finding Your Fan ID](#finding-your-fan-id)
+* [RF Protocol](#rf-protocol)
+* [Notes](#notes)
+<!-- TOC -->
+
+---
+
+## Installation
+
+**Method 1.** HACS → Integrations → ⋮ → Custom repositories → add this repo as **Integration** → search "Shark Flex Breeze" → Download → Restart HA
+
+**Method 2.** Copy `custom_components/shark_flex_breeze/` into your HA `config/custom_components/` → Restart HA
+
+---
+
+## Setup
+
+> **Make sure the fan is physically off before starting setup.** The test step sends a power toggle — if the fan is already on, it will turn off instead of on, and HA's initial state will be wrong.
+
+1. **Settings → Devices & Services → Add Integration → "Shark Flex Breeze"**
+2. Select your RF transmitter entity
+3. Enter a name for the fan (e.g. *Bedroom Fan*)
+4. Choose a previously captured fan ID from the dropdown, or enter a new one
+   - No ID yet? Run [`scripts/get_fan_id.sh`](#finding-your-fan-id) first
+5. A test power command is sent — confirm the fan toggled on
+6. Done — a `fan.*` entity appears under the device
+
+Repeat for each fan.
+
+---
+
+## Features
+
+- **5-speed control** — 20 / 40 / 60 / 80 / 100 %
+- **Turbo preset** — dedicated turbo mode
+- **Oscillation** — swing increase / decrease
+- **Direction** — rotate left / right
+- **State restore** — survives HA restarts (assumed state)
+- **Multi-fan** — add as many fans as you have remotes; each gets its own device
+
+---
+
+## Hardware
+
+This integration requires a compatible RF transmitter added to Home Assistant. See the [Radio Frequency integration docs](https://www.home-assistant.io/integrations/radio_frequency) for supported hardware and setup instructions.
+
+---
+
+## Finding Your Fan ID
+
+Each remote has a unique 24-bit RF ID hardwired at the factory. Capture it once with an RTL-SDR dongle.
+
+**Requirements:** RTL-SDR dongle + `rtl_433`
+```bash
+brew install rtl_433      # macOS
+sudo apt install rtl-433  # Linux
+```
+
+**Capture:**
+```bash
+./scripts/get_fan_id.sh bedroom
+```
+
+Point your remote at the dongle and press any button. Output:
+```
+Fan ID captured: 0e37ee
+
+Use this ID when adding the device in Home Assistant.
+```
+
+The ID is saved to `scripts/known_ids.json` and pre-populated in the config flow dropdown.
+
+<details>
+<summary>Edit known_ids.json manually</summary>
+
+```json
+[
+  { "fan_id": "0e37ee", "name": "Bedroom Fan" },
+  { "fan_id": "0797ef", "name": "Living Room Fan" }
+]
+```
+
+</details>
+
+---
+
+## RF Protocol
+
+Reverse-engineered via RTL-SDR (RTL2838) + rtl_433.
+
+| Parameter | Value |
+|-----------|-------|
+| Frequency | 433.92 MHz |
+| Modulation | OOK PWM (ASK) |
+| Packet length | 41 bits |
+| Repeats per press | 5× |
+| Sync pulse | ~4224 µs |
+| Bit 1 (long) | ~888 µs |
+| Bit 0 (short) | ~308 µs |
+| Inter-symbol gap | ~292 µs |
+| Inter-packet reset | ~9000 µs |
+
+**Packet structure:** `[ bits 0–23 : Fan ID ][ bits 24–40 : Command ]`
+
+**rtl_433 flex decoder:**
+```
+n=fan_remote,m=OOK_PWM,s=308,l=888,r=9000,t=150,y=4224
+```
+
+<details>
+<summary>Full command map</summary>
+
+Codes are built by concatenating the 24-bit fan ID prefix with the 17-bit command suffix.
+
+| Command | Suffix | Fan 1 (`0e37ee`) | Fan 2 (`0797ef`) |
+|---------|--------|------------------|------------------|
+| Power (toggle) | `aa558` | `0e37eeaa558` | `0797efaa558` |
+| Speed increase | `d8278` | `0e37eed8278` | `0797efd8278` |
+| Speed decrease | `b54a8` | `0e37eeb54a8` | `0797efb54a8` |
+| Turbo | `ec138` | `0e37eeec138` | `0797efec138` |
+| Swing increase | `a6598` | `0e37eea6598` | `0797efa6598` |
+| Swing decrease | `97688` | `0e37ee97688` | `0797ef97688` |
+| Rotate left | `e31c8` | `0e37eee31c8` | `0797efe31c8` |
+| Rotate right | `cb348` | `0e37eecb348` | `0797efcb348` |
+
+</details>
+
+---
+
+## Notes
+
+- **State tracking is best-effort** — the fan gives no feedback over RF. If the fan is operated via its physical remote, HA's assumed state will drift and get out of sync.
+- **Power is a toggle** — one code for both on and off. If HA's state is wrong, a `turn_on` call may actually turn it off.
+- **Turbo/burst is also a toggle** — same situation: one code enters and exits burst mode. Pressing turbo while in turbo returns the fan to its previous speed automatically; the integration preserves the pre-turbo speed level in state so no additional speed commands are sent on exit.
+- **5 speed levels, not 4** — speed increase/decrease are relative ±1 commands; the remote has no "go to level N" command. The integration tracks assumed current level and sends the required number of presses to reach the target. If state has drifted, the delta will be wrong.
+- **Not rolling code** — static codes, replay reliably.
+- **Fan ID is not serial-derived** — hardwired in the remote at the factory; must be captured via RTL-SDR.
+
+---
+
+<details>
+<summary>Project structure</summary>
+
+```
+SharkFlexBreezeHACS/
+├── hacs.json
+├── README.md
+├── scripts/
+│   ├── get_fan_id.sh       # capture fan ID from remote via RTL-SDR
+│   └── known_ids.json      # saved fan IDs
+├── custom_components/shark_flex_breeze/
+│   ├── codes/
+│   │   ├── fan1/           # .sub reference files (not used at runtime)
+│   │   └── fan2/
+│   ├── __init__.py
+│   ├── config_flow.py
+│   ├── const.py
+│   ├── entity.py
+│   ├── fan.py
+│   ├── manifest.json
+│   └── strings.json
+└── beta-testing/           # RF reverse engineering tools
+    ├── capture.sh
+    ├── decode.sh
+    ├── watch.sh
+    ├── watch_parser.py
+    ├── scan.sh
+    └── analyze.py
+```
+
+</details>

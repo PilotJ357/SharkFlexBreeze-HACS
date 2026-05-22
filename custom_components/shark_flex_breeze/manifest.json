@@ -1,0 +1,12 @@
+{
+  "domain": "shark_flex_breeze",
+  "name": "Shark Flex Breeze",
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": ["radio_frequency"],
+  "documentation": "https://github.com/PilotJ357/SharkFlexBreeze-HACS",
+  "integration_type": "device",
+  "iot_class": "assumed_state",
+  "quality_scale": "bronze",
+  "version": "0.1.0"
+}
