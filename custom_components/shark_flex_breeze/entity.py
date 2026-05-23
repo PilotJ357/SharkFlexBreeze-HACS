@@ -43,12 +43,14 @@ def make_command(fan_id: str, suffix: str) -> _OOKCommand:
     hex_code = fan_id + suffix
     n = int(hex_code, 16)
     b = bin(n)[2:].zfill(44)[:PACKET_BITS]
-    timings: list[int] = [SYNC_US, -GAP_US]
+    single: list[int] = [SYNC_US, -GAP_US]
     for i, bit in enumerate(b):
         pulse = LONG_US if bit == "1" else SHORT_US
         gap = -RESET_US if i == PACKET_BITS - 1 else -GAP_US
-        timings += [pulse, gap]
-    return _OOKCommand(frequency=FREQ_HZ, timings=timings, repeat_count=0)
+        single += [pulse, gap]
+    # All REPEAT_COUNT repetitions in one timing list so Broadlink transmits
+    # them at hardware speed (~9 ms reset gap), matching the physical remote burst.
+    return _OOKCommand(frequency=FREQ_HZ, timings=single * REPEAT_COUNT, repeat_count=0)
 
 
 class SharkFlexBreezeEntity(Entity):
@@ -110,17 +112,13 @@ class SharkFlexBreezeEntity(Entity):
         suffix = COMMAND_SUFFIXES[command_name]
         command = make_command(self._fan_id, suffix)
         _LOGGER.debug(
-            "Sending %s (fan_id=%s suffix=%s) via %s x%d",
-            command_name, self._fan_id, suffix, self._transmitter, REPEAT_COUNT,
+            "Sending %s (fan_id=%s suffix=%s) via %s",
+            command_name, self._fan_id, suffix, self._transmitter,
         )
-        for i in range(REPEAT_COUNT):
-            try:
-                await async_send_command(
-                    self.hass, self._transmitter, command, context=self._context
-                )
-            except Exception as err:
-                _LOGGER.error(
-                    "Command %s send %d/%d failed: %s",
-                    command_name, i + 1, REPEAT_COUNT, err,
-                )
-                raise
+        try:
+            await async_send_command(
+                self.hass, self._transmitter, command, context=self._context
+            )
+        except Exception as err:
+            _LOGGER.error("Command %s failed: %s", command_name, err)
+            raise
