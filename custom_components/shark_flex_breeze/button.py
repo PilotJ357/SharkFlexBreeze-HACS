@@ -40,6 +40,10 @@ class SharkFlexBreezeRotateLeftButton(SharkFlexBreezeEntity, ButtonEntity):
     _attr_translation_key = "rotate_left"
     _attr_icon = "mdi:rotate-left"
 
+    def __init__(self, entry: ConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{self._attr_unique_id}_rotate_left"
+
     async def async_press(self) -> None:
         await self._async_send("rotate_left")
 
@@ -47,6 +51,10 @@ class SharkFlexBreezeRotateLeftButton(SharkFlexBreezeEntity, ButtonEntity):
 class SharkFlexBreezeRotateRightButton(SharkFlexBreezeEntity, ButtonEntity):
     _attr_translation_key = "rotate_right"
     _attr_icon = "mdi:rotate-right"
+
+    def __init__(self, entry: ConfigEntry) -> None:
+        super().__init__(entry)
+        self._attr_unique_id = f"{self._attr_unique_id}_rotate_right"
 
     async def async_press(self) -> None:
         await self._async_send("rotate_right")
