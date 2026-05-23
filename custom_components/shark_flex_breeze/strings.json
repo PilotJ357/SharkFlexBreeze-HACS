@@ -36,7 +36,12 @@
       },
       "test": {
         "title": "Test Connection",
-        "description": "A power command has been sent to **{fan_name}**. Did the fan respond?\n\nIf not, check that the transmitter is within range and that the fan ID is correct."
+        "description": "A power command has been sent to **{fan_name}**. Did the fan respond?\n\nIf not, check that the transmitter is within range and that the fan ID is correct.",
+        "menu_options": {
+          "confirm": "Yes, fan responded — finish setup",
+          "retry": "No — send the command again",
+          "cancel": "Cancel setup"
+        }
       },
       "confirm": {
         "title": "Add Fan",
