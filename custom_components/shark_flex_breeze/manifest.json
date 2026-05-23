@@ -9,5 +9,5 @@
   "iot_class": "assumed_state",
   "issue_tracker": "https://github.com/PilotJ357/SharkFlexBreeze-HACS/issues",
   "quality_scale": "bronze",
-  "version": "0.1.1"
+  "version": "0.1.2"
 }
