@@ -159,7 +159,11 @@ class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_menu(
             step_id="test",
-            menu_options=["confirm", "retry", "cancel"],
+            menu_options={
+                "confirm": "Yes, the fan responded — finish setup",
+                "retry": "No — send the command again",
+                "cancel": "Cancel",
+            },
             description_placeholders={"fan_name": self._pending[CONF_FAN_NAME]},
         )
 
