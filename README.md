@@ -1,9 +1,9 @@
 # Shark Flex Breeze
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-[![GitHub Release](https://img.shields.io/github/v/release/PilotJ357/SharkFlexBreeze-HACS?style=flat-square)](https://github.com/PilotJ357/SharkFlexBreeze-HACS/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/PilotJ357/shark-flex-breeze-ha?style=flat-square)](https://github.com/PilotJ357/shark-flex-breeze-ha/releases)
 [![HA Version](https://img.shields.io/badge/Home%20Assistant-2026.5%2B-blue?style=flat-square)](https://www.home-assistant.io/)
-[![License](https://img.shields.io/github/license/PilotJ357/SharkFlexBreeze-HACS?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/github/license/PilotJ357/shark-flex-breeze-ha?style=flat-square)](LICENSE)
 
 _Control SharkFlexBreeze tower fans from Home Assistant via native RF capabilities._
 
@@ -129,7 +129,7 @@ Use this ID when adding the device in Home Assistant.
 
 Fan IDs are the main thing to figure out. I don't know how many unique IDs exist, whether there are patterns, or how they're assigned.
 
-**If you find a new ID — or figure out how they're encoded — please [open a PR](https://github.com/PilotJ357/SharkFlexBreeze-HACS/pulls)** to add it to [`known_ids.json`](custom_components/shark_flex_breeze/known_ids.json). The more IDs we collect, the more useful the "try a community ID" flow becomes for people without an SDR.
+**If you find a new ID — or figure out how they're encoded — please [open a PR](https://github.com/PilotJ357/shark-flex-breeze-ha/pulls)** to add it to [`known_ids.json`](custom_components/shark_flex_breeze/known_ids.json). The more IDs we collect, the more useful the "try a community ID" flow becomes for people without an SDR.
 
 ---
 

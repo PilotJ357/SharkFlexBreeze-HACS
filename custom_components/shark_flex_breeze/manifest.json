@@ -4,10 +4,10 @@
   "codeowners": ["@PilotJ357"],
   "config_flow": true,
   "dependencies": ["radio_frequency"],
-  "documentation": "https://github.com/PilotJ357/SharkFlexBreeze-HACS",
+  "documentation": "https://github.com/PilotJ357/shark-flex-breeze-ha",
   "integration_type": "device",
   "iot_class": "assumed_state",
-  "issue_tracker": "https://github.com/PilotJ357/SharkFlexBreeze-HACS/issues",
+  "issue_tracker": "https://github.com/PilotJ357/shark-flex-breeze-ha/issues",
   "quality_scale": "bronze",
   "version": "0.1.2"
 }
