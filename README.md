@@ -10,6 +10,7 @@ _Control SharkFlexBreeze tower fans from Home Assistant via 433 MHz RF — no cl
 ---
 
 <!-- TOC -->
+* [AI Disclosure](#ai-disclosure)
 * [Installation](#installation)
 * [Setup](#setup)
 * [Features](#features)
@@ -19,6 +20,12 @@ _Control SharkFlexBreeze tower fans from Home Assistant via 433 MHz RF — no cl
 * [RF Protocol](#rf-protocol)
 * [Notes](#notes)
 <!-- TOC -->
+
+---
+
+## AI Disclosure
+
+This entire integration was build with Claude Code because I wanted to control these fans through HA's new RF support. I make no claims to be an expert developer but I've tried my best to (have Claude) follow best practices. I welcome improvements if there are issues. I promise, if I had attempted to hodge-podge this together, I'd never share it because it would probaly "work" well enough for my own use in the worst ways. Let's be honest, despite having a ham license, SDRs are an enigma to me. Claude reverse engineered the RF commands in <30 minutes. 
 
 ---
 
