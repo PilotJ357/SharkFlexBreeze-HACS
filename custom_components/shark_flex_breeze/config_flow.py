@@ -149,10 +149,13 @@ class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
         from homeassistant.components.radio_frequency import async_send_command
         from .const import COMMAND_SUFFIXES
 
-        command = make_command(self._pending[CONF_FAN_ID], COMMAND_SUFFIXES["power"])
-        await async_send_command(
-            self.hass, self._pending[CONF_TRANSMITTER], command
-        )
+        try:
+            command = make_command(self._pending[CONF_FAN_ID], COMMAND_SUFFIXES["power"])
+            await async_send_command(
+                self.hass, self._pending[CONF_TRANSMITTER], command
+            )
+        except Exception:
+            pass
 
         return self.async_show_menu(
             step_id="test",
