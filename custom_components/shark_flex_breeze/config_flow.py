@@ -76,7 +76,7 @@ class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
             self._pending[CONF_FAN_ID] = choice
             return await self.async_step_test()
 
-        # Build dropdown: existing configured fan IDs + "Enter new"
+        # Build dropdown from existing configured fans
         known: list[SelectOptionDict] = [
             SelectOptionDict(
                 value=entry.data[CONF_FAN_ID],
@@ -85,6 +85,11 @@ class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
             for entry in self.hass.config_entries.async_entries(DOMAIN)
             if CONF_FAN_ID in entry.data
         ]
+
+        # Skip the picker entirely if no prior fans — go straight to manual entry
+        if not known:
+            return await self.async_step_manual_id()
+
         known.append(SelectOptionDict(value=_ENTER_NEW, label="Enter a new ID…"))
 
         return self.async_show_form(
