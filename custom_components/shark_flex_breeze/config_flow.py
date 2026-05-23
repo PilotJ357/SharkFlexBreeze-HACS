@@ -95,7 +95,7 @@ class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
 
         # Community IDs bundled with the integration — may or may not match your fan
         community: dict[str, str] = {
-            e["fan_id"]: f"{e['name']} — community ID, may not match your fan"
+            e["fan_id"]: f"{e['fan_id']} (community — may not match your fan)"
             for e in _load_known_ids()
             if "fan_id" in e and "name" in e
             and e["fan_id"] not in configured  # don't duplicate already-configured IDs
