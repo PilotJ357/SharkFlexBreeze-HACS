@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from homeassistant.components.radio_frequency import async_send_command
+from homeassistant.components.radio_frequency import ModulationType, async_send_command
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity import DeviceInfo, Entity
 from homeassistant.helpers.event import async_track_state_change_event
-from rf_protocols.commands.ook import OOKCommand
+from rf_protocols import RadioFrequencyCommand
 
 from .const import (
     COMMAND_SUFFIXES,
@@ -23,7 +23,16 @@ from .const import (
 )
 
 
-def make_command(fan_id: str, suffix: str) -> OOKCommand:
+class _OOKCommand(RadioFrequencyCommand):
+    def __init__(self, *, frequency: int, timings: list[int], repeat_count: int = 0) -> None:
+        super().__init__(frequency=frequency, modulation=ModulationType.OOK, repeat_count=repeat_count)
+        self.timings = timings
+
+    def get_raw_timings(self) -> list[int]:
+        return self.timings
+
+
+def make_command(fan_id: str, suffix: str) -> _OOKCommand:
     """Build an OOKCommand from a fan ID prefix and command suffix."""
     hex_code = fan_id + suffix
     n = int(hex_code, 16)
@@ -33,7 +42,7 @@ def make_command(fan_id: str, suffix: str) -> OOKCommand:
         pulse = LONG_US if bit == "1" else SHORT_US
         gap = -RESET_US if i == PACKET_BITS - 1 else -GAP_US
         timings += [pulse, gap]
-    return OOKCommand(frequency=FREQ_HZ, timings=timings, repeat_count=REPEAT_COUNT)
+    return _OOKCommand(frequency=FREQ_HZ, timings=timings, repeat_count=REPEAT_COUNT)
 
 
 class SharkFlexBreezeEntity(Entity):

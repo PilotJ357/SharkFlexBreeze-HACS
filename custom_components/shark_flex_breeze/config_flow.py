@@ -33,14 +33,14 @@ from .const import (
 
 _FAN_ID_RE = re.compile(r"^[0-9a-fA-F]{6}$")
 _ENTER_NEW = "enter_new"
-_KNOWN_IDS_FILE = Path(__file__).parent / "known_ids.json"
-
 
 def _load_known_ids() -> list[dict]:
     try:
-        return json.loads(_KNOWN_IDS_FILE.read_text())
+        return json.loads((Path(__file__).parent / "known_ids.json").read_text())
     except (OSError, json.JSONDecodeError):
         return []
+
+_KNOWN_IDS: list[dict] = _load_known_ids()
 
 
 class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -96,7 +96,7 @@ class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
         # Community IDs bundled with the integration — may or may not match your fan
         community: dict[str, str] = {
             e["fan_id"]: f"{e['fan_id']} (community — may not match your fan)"
-            for e in _load_known_ids()
+            for e in _KNOWN_IDS
             if "fan_id" in e and "name" in e
             and e["fan_id"] not in configured  # don't duplicate already-configured IDs
         }
