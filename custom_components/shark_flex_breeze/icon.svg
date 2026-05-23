@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Tower fan body (tall pill) -->
+  <rect x="155" y="60" width="115" height="300" rx="57" fill="#1E88E5"/>
+
+  <!-- Power button indicator -->
+  <circle cx="212" cy="108" r="14" fill="#ffffff" opacity="0.85"/>
+
+  <!-- Grille output slats -->
+  <rect x="157" y="163" width="111" height="8" rx="4" fill="#1565C0" opacity="0.55"/>
+  <rect x="157" y="190" width="111" height="8" rx="4" fill="#1565C0" opacity="0.55"/>
+  <rect x="157" y="217" width="111" height="8" rx="4" fill="#1565C0" opacity="0.55"/>
+  <rect x="157" y="244" width="111" height="8" rx="4" fill="#1565C0" opacity="0.55"/>
+  <rect x="157" y="271" width="111" height="8" rx="4" fill="#1565C0" opacity="0.55"/>
+  <rect x="157" y="298" width="111" height="8" rx="4" fill="#1565C0" opacity="0.55"/>
+  <rect x="157" y="325" width="111" height="8" rx="4" fill="#1565C0" opacity="0.55"/>
+
+  <!-- Base platform -->
+  <rect x="112" y="356" width="200" height="30" rx="12" fill="#1565C0"/>
+  <!-- Foot -->
+  <rect x="132" y="382" width="160" height="24" rx="10" fill="#0D47A1"/>
+
+  <!-- Wind / airflow arcs (three curves flowing right) -->
+  <!-- Top arc -->
+  <path d="M 278 148 Q 338 138 368 168 Q 396 198 372 228"
+        stroke="#64B5F6" stroke-width="16" fill="none"
+        stroke-linecap="round"/>
+  <!-- Middle arc -->
+  <path d="M 278 213 Q 355 200 390 235 Q 425 270 395 305"
+        stroke="#90CAF9" stroke-width="13" fill="none"
+        stroke-linecap="round"/>
+  <!-- Bottom arc -->
+  <path d="M 278 278 Q 340 266 368 292 Q 396 318 376 345"
+        stroke="#BBDEFB" stroke-width="10" fill="none"
+        stroke-linecap="round"/>
+</svg>
