@@ -78,7 +78,32 @@ The config flow includes a dropdown of **community-contributed IDs** (see [`know
 
 > **No SDR?** Try the community IDs. If one works, great. If not, you'll need to capture yours with an RTL-SDR dongle.
 
-### Capture with RTL-SDR
+### Option A: Capture with Broadlink RM4 Pro (recommended)
+
+If you already have a Broadlink device in HA, this is the easiest path — no extra hardware required.
+
+**Requirements:** Python 3 + `broadlink` library
+```bash
+pip3 install broadlink
+```
+
+**Capture:**
+```bash
+python3 scripts/get_fan_id_broadlink.py 192.168.1.x
+```
+
+Replace `192.168.1.x` with your Broadlink device's IP address. Follow the on-screen prompts — hold a button to lock the frequency, then press once to capture.
+
+Output:
+```
+Fan ID captured: 0e37ee
+
+Use this ID when adding the device in Home Assistant.
+```
+
+---
+
+### Option B: Capture with RTL-SDR
 
 **Requirements:** RTL-SDR dongle + `rtl_433`
 ```bash
@@ -170,7 +195,8 @@ SharkFlexBreezeHACS/
 ├── README.md
 ├── icon.png
 ├── scripts/
-│   └── get_fan_id.sh       # capture fan ID from remote via RTL-SDR
+│   ├── get_fan_id.sh               # capture fan ID via RTL-SDR
+│   └── get_fan_id_broadlink.py     # capture fan ID via Broadlink RM4 Pro
 └── custom_components/shark_flex_breeze/
     ├── __init__.py
     ├── button.py
