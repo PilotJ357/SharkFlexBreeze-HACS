@@ -72,7 +72,7 @@ This integration requires a compatible RF transmitter added to Home Assistant. S
 
 ## Finding Your Fan ID
 
-Each remote has a unique 24-bit RF ID hardwired at the factory. **It is not derived from the serial number** — we don't yet know how IDs are assigned or whether there are patterns across units.
+Each remote has a unique 24-bit RF ID hardwired at the factory. **It does not appear to be derived from the serial number** — I don't yet know how IDs are assigned or whether there are patterns across units.
 
 The config flow includes a dropdown of **community-contributed IDs** (see [`known_ids.json`](custom_components/shark_flex_breeze/known_ids.json)). If you don't have an SDR, try those first — your fan may share an ID with a known remote. If none work, you'll need to capture yours.
 
@@ -127,7 +127,7 @@ Use this ID when adding the device in Home Assistant.
 
 ## Contributing
 
-Fan IDs are the main thing we're still figuring out. We don't know how many unique IDs exist, whether there are patterns, or how they're assigned at the factory.
+Fan IDs are the main thing to figure out. I don't know how many unique IDs exist, whether there are patterns, or how they're assigned.
 
 **If you find a new ID — or figure out how they're encoded — please [open a PR](https://github.com/PilotJ357/SharkFlexBreeze-HACS/pulls)** to add it to [`known_ids.json`](custom_components/shark_flex_breeze/known_ids.json). The more IDs we collect, the more useful the "try a community ID" flow becomes for people without an SDR.
 
