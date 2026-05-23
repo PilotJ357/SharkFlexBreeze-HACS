@@ -5,7 +5,7 @@
 [![HA Version](https://img.shields.io/badge/Home%20Assistant-2026.5%2B-blue?style=flat-square)](https://www.home-assistant.io/)
 [![License](https://img.shields.io/github/license/PilotJ357/SharkFlexBreeze-HACS?style=flat-square)](LICENSE)
 
-_Control SharkFlexBreeze tower fans from Home Assistant via 433 MHz RF — no cloud, no hub, just a cheap SDR and a transmitter._
+_Control SharkFlexBreeze tower fans from Home Assistant via native RF capabilities._
 
 ---
 
