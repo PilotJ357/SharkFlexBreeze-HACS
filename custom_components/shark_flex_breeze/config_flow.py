@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import re
+from pathlib import Path
 from typing import Any
 
 import voluptuous as vol
@@ -31,6 +33,14 @@ from .const import (
 
 _FAN_ID_RE = re.compile(r"^[0-9a-fA-F]{6}$")
 _ENTER_NEW = "enter_new"
+_KNOWN_IDS_FILE = Path(__file__).parent / "known_ids.json"
+
+
+def _load_known_ids() -> list[dict]:
+    try:
+        return json.loads(_KNOWN_IDS_FILE.read_text())
+    except (OSError, json.JSONDecodeError):
+        return []
 
 
 class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -76,20 +86,25 @@ class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
             self._pending[CONF_FAN_ID] = choice
             return await self.async_step_test()
 
-        # Build dropdown from existing configured fans
-        known: list[SelectOptionDict] = [
-            SelectOptionDict(
-                value=entry.data[CONF_FAN_ID],
-                label=f"{entry.title} ({entry.data[CONF_FAN_ID]})",
-            )
+        # IDs from previously configured fans (this HA instance)
+        configured: dict[str, str] = {
+            entry.data[CONF_FAN_ID]: f"{entry.title} ({entry.data[CONF_FAN_ID]})"
             for entry in self.hass.config_entries.async_entries(DOMAIN)
             if CONF_FAN_ID in entry.data
+        }
+
+        # Community IDs bundled with the integration — may or may not match your fan
+        community: dict[str, str] = {
+            e["fan_id"]: f"{e['name']} — community ID, may not match your fan"
+            for e in _load_known_ids()
+            if "fan_id" in e and "name" in e
+            and e["fan_id"] not in configured  # don't duplicate already-configured IDs
+        }
+
+        known: list[SelectOptionDict] = [
+            SelectOptionDict(value=fan_id, label=label)
+            for fan_id, label in {**configured, **community}.items()
         ]
-
-        # Skip the picker entirely if no prior fans — go straight to manual entry
-        if not known:
-            return await self.async_step_manual_id()
-
         known.append(SelectOptionDict(value=_ENTER_NEW, label="Enter a new ID…"))
 
         return self.async_show_form(

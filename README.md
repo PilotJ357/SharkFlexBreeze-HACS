@@ -15,6 +15,7 @@ _Control SharkFlexBreeze tower fans from Home Assistant via 433 MHz RF — no cl
 * [Features](#features)
 * [Hardware](#hardware)
 * [Finding Your Fan ID](#finding-your-fan-id)
+* [Contributing](#contributing)
 * [RF Protocol](#rf-protocol)
 * [Notes](#notes)
 <!-- TOC -->
@@ -64,7 +65,13 @@ This integration requires a compatible RF transmitter added to Home Assistant. S
 
 ## Finding Your Fan ID
 
-Each remote has a unique 24-bit RF ID hardwired at the factory. Capture it once with an RTL-SDR dongle.
+Each remote has a unique 24-bit RF ID hardwired at the factory. **It is not derived from the serial number** — we don't yet know how IDs are assigned or whether there are patterns across units.
+
+The config flow includes a dropdown of **community-contributed IDs** (see [`known_ids.json`](custom_components/shark_flex_breeze/known_ids.json)). If you don't have an SDR, try those first — your fan may share an ID with a known remote. If none work, you'll need to capture yours.
+
+> **No SDR?** Try the community IDs. If one works, great. If not, you'll need to capture yours with an RTL-SDR dongle.
+
+### Capture with RTL-SDR
 
 **Requirements:** RTL-SDR dongle + `rtl_433`
 ```bash
@@ -84,19 +91,13 @@ Fan ID captured: 0e37ee
 Use this ID when adding the device in Home Assistant.
 ```
 
-The ID is saved to `scripts/known_ids.json` and pre-populated in the config flow dropdown.
+---
 
-<details>
-<summary>Edit known_ids.json manually</summary>
+## Contributing
 
-```json
-[
-  { "fan_id": "0e37ee", "name": "Bedroom Fan" },
-  { "fan_id": "0797ef", "name": "Living Room Fan" }
-]
-```
+Fan IDs are the main thing we're still figuring out. We don't know how many unique IDs exist, whether there are patterns, or how they're assigned at the factory.
 
-</details>
+**If you find a new ID — or figure out how they're encoded — please [open a PR](https://github.com/PilotJ357/SharkFlexBreeze-HACS/pulls)** to add it to [`known_ids.json`](custom_components/shark_flex_breeze/known_ids.json). The more IDs we collect, the more useful the "try a community ID" flow becomes for people without an SDR.
 
 ---
 
