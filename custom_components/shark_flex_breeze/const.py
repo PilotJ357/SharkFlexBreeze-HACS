@@ -12,7 +12,7 @@ SHORT_US = 308   # bit 0
 GAP_US = 292     # inter-symbol gap
 RESET_US = 9000  # inter-packet gap
 PACKET_BITS = 41
-REPEAT_COUNT = 5
+REPEAT_COUNT = 1
 
 COMMAND_SUFFIXES: dict[str, str] = {
     "power":          "aa558",
