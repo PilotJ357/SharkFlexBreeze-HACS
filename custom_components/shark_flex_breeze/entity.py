@@ -107,8 +107,20 @@ class SharkFlexBreezeEntity(Entity):
         )
 
     async def _async_send(self, command_name: str) -> None:
-        command = make_command(self._fan_id, COMMAND_SUFFIXES[command_name])
-        for _ in range(REPEAT_COUNT):
-            await async_send_command(
-                self.hass, self._transmitter, command, context=self._context
-            )
+        suffix = COMMAND_SUFFIXES[command_name]
+        command = make_command(self._fan_id, suffix)
+        _LOGGER.debug(
+            "Sending %s (fan_id=%s suffix=%s) via %s x%d",
+            command_name, self._fan_id, suffix, self._transmitter, REPEAT_COUNT,
+        )
+        for i in range(REPEAT_COUNT):
+            try:
+                await async_send_command(
+                    self.hass, self._transmitter, command, context=self._context
+                )
+            except Exception as err:
+                _LOGGER.error(
+                    "Command %s send %d/%d failed: %s",
+                    command_name, i + 1, REPEAT_COUNT, err,
+                )
+                raise
