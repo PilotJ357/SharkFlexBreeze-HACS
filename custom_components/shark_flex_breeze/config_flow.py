@@ -150,10 +150,12 @@ class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
         from .const import COMMAND_SUFFIXES
 
         try:
+            from .const import REPEAT_COUNT
             command = make_command(self._pending[CONF_FAN_ID], COMMAND_SUFFIXES["power"])
-            await async_send_command(
-                self.hass, self._pending[CONF_TRANSMITTER], command
-            )
+            for _ in range(REPEAT_COUNT):
+                await async_send_command(
+                    self.hass, self._pending[CONF_TRANSMITTER], command
+                )
         except Exception:
             pass
 

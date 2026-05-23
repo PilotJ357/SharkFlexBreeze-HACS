@@ -48,7 +48,7 @@ def make_command(fan_id: str, suffix: str) -> _OOKCommand:
         pulse = LONG_US if bit == "1" else SHORT_US
         gap = -RESET_US if i == PACKET_BITS - 1 else -GAP_US
         timings += [pulse, gap]
-    return _OOKCommand(frequency=FREQ_HZ, timings=timings, repeat_count=REPEAT_COUNT)
+    return _OOKCommand(frequency=FREQ_HZ, timings=timings, repeat_count=0)
 
 
 class SharkFlexBreezeEntity(Entity):
@@ -108,6 +108,7 @@ class SharkFlexBreezeEntity(Entity):
 
     async def _async_send(self, command_name: str) -> None:
         command = make_command(self._fan_id, COMMAND_SUFFIXES[command_name])
-        await async_send_command(
-            self.hass, self._transmitter, command, context=self._context
-        )
+        for _ in range(REPEAT_COUNT):
+            await async_send_command(
+                self.hass, self._transmitter, command, context=self._context
+            )
