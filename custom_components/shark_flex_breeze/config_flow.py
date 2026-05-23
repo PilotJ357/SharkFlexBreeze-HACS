@@ -5,8 +5,12 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.components.radio_frequency import async_get_transmitters
+from homeassistant.components.radio_frequency import (
+    ModulationType,
+    async_get_transmitters,
+)
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.selector import (
     EntitySelector,
     EntitySelectorConfig,
@@ -23,7 +27,6 @@ from .const import (
     CONF_TRANSMITTER,
     DOMAIN,
     FREQ_HZ,
-    MODULATION,
 )
 
 _FAN_ID_RE = re.compile(r"^[0-9a-fA-F]{6}$")
@@ -39,8 +42,11 @@ class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        transmitters = async_get_transmitters(self.hass, FREQ_HZ, MODULATION)
-        if not transmitters:
+        try:
+            transmitters = async_get_transmitters(
+                self.hass, FREQ_HZ, ModulationType.OOK
+            )
+        except HomeAssistantError:
             return self.async_abort(reason="no_compatible_transmitters")
 
         if user_input is not None:

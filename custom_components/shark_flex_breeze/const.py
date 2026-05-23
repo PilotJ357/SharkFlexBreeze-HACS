@@ -14,8 +14,6 @@ RESET_US = 9000  # inter-packet gap
 PACKET_BITS = 41
 REPEAT_COUNT = 5
 
-MODULATION = "OOK"
-
 COMMAND_SUFFIXES: dict[str, str] = {
     "power":          "aa558",
     "speed_increase": "d8278",
