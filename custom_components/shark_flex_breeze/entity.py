@@ -31,8 +31,8 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
-# RF burst duration: SYNC + RESET + 5 reps × 41 bits × ~1216µs ≈ 263ms; add margin
-_MIN_CMD_GAP_S = 0.35
+# RF burst duration: SYNC + RESET + 5 reps × 41 bits × ~1216µs ≈ 263ms; 500ms margin
+_MIN_CMD_GAP_S = 0.5
 
 
 class _OOKCommand(RadioFrequencyCommand):
