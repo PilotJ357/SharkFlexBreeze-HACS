@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import logging
+
 from homeassistant.components.radio_frequency import ModulationType, async_send_command
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.entity import DeviceInfo, Entity
+from homeassistant.const import STATE_UNAVAILABLE
+from homeassistant.core import Event, EventStateChangedData, callback
+from homeassistant.helpers import entity_registry as er
+from homeassistant.helpers.device_registry import DeviceInfo
+from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import async_track_state_change_event
 from rf_protocols import RadioFrequencyCommand
 
@@ -22,6 +27,8 @@ from .const import (
     SYNC_US,
 )
 
+_LOGGER = logging.getLogger(__name__)
+
 
 class _OOKCommand(RadioFrequencyCommand):
     def __init__(self, *, frequency: int, timings: list[int], repeat_count: int = 0) -> None:
@@ -33,7 +40,6 @@ class _OOKCommand(RadioFrequencyCommand):
 
 
 def make_command(fan_id: str, suffix: str) -> _OOKCommand:
-    """Build an OOKCommand from a fan ID prefix and command suffix."""
     hex_code = fan_id + suffix
     n = int(hex_code, 16)
     b = bin(n)[2:].zfill(44)[:PACKET_BITS]
@@ -54,6 +60,7 @@ class SharkFlexBreezeEntity(Entity):
         self._entry = entry
         self._transmitter: str = entry.data[CONF_TRANSMITTER]
         self._fan_id: str = entry.data[CONF_FAN_ID]
+        self._transmitter_entity_id: str = self._transmitter
         self._attr_unique_id = f"{self._transmitter}_{self._fan_id}"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
@@ -64,28 +71,43 @@ class SharkFlexBreezeEntity(Entity):
 
     async def async_added_to_hass(self) -> None:
         await super().async_added_to_hass()
+
+        self._transmitter_entity_id = er.async_validate_entity_id(
+            er.async_get(self.hass), self._transmitter
+        )
+
+        @callback
+        def _handle_transmitter_state_change(
+            event: Event[EventStateChangedData],
+        ) -> None:
+            new_state = event.data["new_state"]
+            available = new_state is not None and new_state.state != STATE_UNAVAILABLE
+            if available != self.available:
+                _LOGGER.info(
+                    "Transmitter %s used by %s is %s",
+                    self._transmitter_entity_id,
+                    self.entity_id,
+                    "available" if available else "unavailable",
+                )
+                self._attr_available = available
+                self.async_write_ha_state()
+
         self.async_on_remove(
             async_track_state_change_event(
                 self.hass,
-                self._transmitter,
-                self._handle_transmitter_state_change,
+                [self._transmitter_entity_id],
+                _handle_transmitter_state_change,
             )
         )
-        self._update_availability_from_transmitter()
 
-    @callback
-    def _handle_transmitter_state_change(self, event) -> None:
-        self._update_availability_from_transmitter()
-        self.async_write_ha_state()
-
-    @callback
-    def _update_availability_from_transmitter(self) -> None:
-        state = self.hass.states.get(self._transmitter)
-        self._attr_available = state is not None and state.state not in (
-            "unavailable",
-            "unknown",
+        transmitter_state = self.hass.states.get(self._transmitter_entity_id)
+        self._attr_available = (
+            transmitter_state is not None
+            and transmitter_state.state != STATE_UNAVAILABLE
         )
 
     async def _async_send(self, command_name: str) -> None:
         command = make_command(self._fan_id, COMMAND_SUFFIXES[command_name])
-        await async_send_command(self.hass, self._transmitter, command)
+        await async_send_command(
+            self.hass, self._transmitter, command, context=self._context
+        )
