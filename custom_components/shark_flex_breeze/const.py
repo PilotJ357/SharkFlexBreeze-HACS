@@ -26,6 +26,6 @@ COMMAND_SUFFIXES: dict[str, str] = {
     "rotate_right":   "cb348",
 }
 
-PRESET_NORMAL = "Normal"
-PRESET_TURBO = "Turbo"
+PRESET_NORMAL = "normal"
+PRESET_TURBO = "turbo"
 PRESET_MODES = [PRESET_NORMAL, PRESET_TURBO]

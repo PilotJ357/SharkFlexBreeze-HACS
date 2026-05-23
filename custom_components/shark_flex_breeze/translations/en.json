@@ -55,8 +55,8 @@
         "state_attributes": {
           "preset_mode": {
             "state": {
-              "Normal": "Normal",
-              "Turbo": "Turbo"
+              "normal": "Normal",
+              "turbo": "Turbo"
             }
           }
         }
