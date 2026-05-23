@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import logging
+import time
 
 from homeassistant.components.radio_frequency import ModulationType, async_send_command
 from homeassistant.config_entries import ConfigEntry
@@ -29,6 +31,8 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+# RF burst duration: SYNC + RESET + 5 reps × 41 bits × ~1216µs ≈ 263ms; add margin
+_MIN_CMD_GAP_S = 0.35
 
 
 class _OOKCommand(RadioFrequencyCommand):
@@ -65,6 +69,7 @@ class SharkFlexBreezeEntity(Entity):
         self._fan_id: str = entry.data[CONF_FAN_ID]
         self._transmitter_entity_id: str = self._transmitter
         self._attr_unique_id = f"{self._transmitter}_{self._fan_id}"
+        self._last_cmd_time: float = 0.0
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             manufacturer="Shark",
@@ -110,6 +115,10 @@ class SharkFlexBreezeEntity(Entity):
         )
 
     async def _async_send(self, command_name: str) -> None:
+        # Rate-limit: wait out any remaining RF burst time from the previous command
+        gap = _MIN_CMD_GAP_S - (time.monotonic() - self._last_cmd_time)
+        if gap > 0:
+            await asyncio.sleep(gap)
         suffix = COMMAND_SUFFIXES[command_name]
         command = make_command(self._fan_id, suffix)
         _LOGGER.debug(
@@ -123,3 +132,5 @@ class SharkFlexBreezeEntity(Entity):
         except Exception as err:
             _LOGGER.error("Command %s failed: %s", command_name, err)
             raise
+        finally:
+            self._last_cmd_time = time.monotonic()
