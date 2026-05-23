@@ -1,0 +1,20 @@
+name: Hassfest
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  hassfest:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout
+        uses: "actions/checkout@900f2210b1d28bbbd0bd22d17926b9e224e8f231"  # main @ 2026-05-23
+
+      - name: Hassfest validation
+        uses: "home-assistant/actions/hassfest@f6f29a7ee3fa0eccadf3620a7b9ee00ab54ec03b"  # master @ 2026-05-23
