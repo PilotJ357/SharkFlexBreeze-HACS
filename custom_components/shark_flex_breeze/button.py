@@ -18,7 +18,11 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
-    async_add_entities([SharkFlexBreezeResetButton(entry)])
+    async_add_entities([
+        SharkFlexBreezeResetButton(entry),
+        SharkFlexBreezeRotateLeftButton(entry),
+        SharkFlexBreezeRotateRightButton(entry),
+    ])
 
 
 class SharkFlexBreezeResetButton(SharkFlexBreezeEntity, ButtonEntity):
@@ -30,3 +34,19 @@ class SharkFlexBreezeResetButton(SharkFlexBreezeEntity, ButtonEntity):
         fan = self.hass.data[DOMAIN][self._entry.entry_id].get("fan")
         if fan is not None:
             fan.reset_state()
+
+
+class SharkFlexBreezeRotateLeftButton(SharkFlexBreezeEntity, ButtonEntity):
+    _attr_translation_key = "rotate_left"
+    _attr_icon = "mdi:rotate-left"
+
+    async def async_press(self) -> None:
+        await self._async_send("rotate_left")
+
+
+class SharkFlexBreezeRotateRightButton(SharkFlexBreezeEntity, ButtonEntity):
+    _attr_translation_key = "rotate_right"
+    _attr_icon = "mdi:rotate-right"
+
+    async def async_press(self) -> None:
+        await self._async_send("rotate_right")

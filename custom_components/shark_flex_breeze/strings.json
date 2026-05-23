@@ -66,6 +66,12 @@
       "reset_state": {
         "name": "Reset State",
         "description": "Resets assumed state to off. Use after physically powering the fan off so HA re-syncs — next turn on will start from speed 1."
+      },
+      "rotate_left": {
+        "name": "Rotate Left"
+      },
+      "rotate_right": {
+        "name": "Rotate Right"
       }
     }
   }

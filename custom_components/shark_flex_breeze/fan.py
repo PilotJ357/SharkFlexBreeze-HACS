@@ -34,7 +34,6 @@ class SharkFlexBreezeFan(SharkFlexBreezeEntity, FanEntity, RestoreEntity):
         | FanEntityFeature.TURN_OFF
         | FanEntityFeature.SET_SPEED
         | FanEntityFeature.OSCILLATE
-        | FanEntityFeature.DIRECTION
         | FanEntityFeature.PRESET_MODE
     )
 
@@ -46,7 +45,6 @@ class SharkFlexBreezeFan(SharkFlexBreezeEntity, FanEntity, RestoreEntity):
         self._speed_level: int = 0
         self._preset_mode: str | None = None
         self._oscillating: bool = False
-        self._direction: str = "forward"
 
     # ── state properties ────────────────────────────────────────────────────
 
@@ -68,10 +66,6 @@ class SharkFlexBreezeFan(SharkFlexBreezeEntity, FanEntity, RestoreEntity):
     def oscillating(self) -> bool:
         return self._oscillating
 
-    @property
-    def current_direction(self) -> str:
-        return self._direction
-
     # ── restore ─────────────────────────────────────────────────────────────
 
     async def async_added_to_hass(self) -> None:
@@ -87,9 +81,6 @@ class SharkFlexBreezeFan(SharkFlexBreezeEntity, FanEntity, RestoreEntity):
             osc = attrs.get("oscillating")
             if osc is not None:
                 self._oscillating = bool(osc)
-            direction = attrs.get("direction")
-            if direction is not None:
-                self._direction = direction
 
     # ── commands ─────────────────────────────────────────────────────────────
 
@@ -172,12 +163,6 @@ class SharkFlexBreezeFan(SharkFlexBreezeEntity, FanEntity, RestoreEntity):
         self._oscillating = oscillating
         self.async_write_ha_state()
 
-    async def async_set_direction(self, direction: str) -> None:
-        cmd = "rotate_right" if direction == "forward" else "rotate_left"
-        await self._async_send(cmd)
-        self._direction = direction
-        self.async_write_ha_state()
-
     # ── state sync ───────────────────────────────────────────────────────────
 
     def reset_state(self) -> None:
@@ -187,13 +172,15 @@ class SharkFlexBreezeFan(SharkFlexBreezeEntity, FanEntity, RestoreEntity):
         self._speed_level = 0
         self._preset_mode = None
         self._oscillating = False
-        self._direction = "forward"
         self.async_write_ha_state()
 
     # ── helpers ──────────────────────────────────────────────────────────────
 
     async def _set_speed_level(self, target: int) -> None:
         target = max(1, min(5, target))
+        if self._preset_mode == PRESET_TURBO:
+            await self._async_send("turbo")  # exit turbo; fan returns to _speed_level
+            self._preset_mode = PRESET_NORMAL
         delta = target - self._speed_level
         if delta > 0:
             for _ in range(delta):

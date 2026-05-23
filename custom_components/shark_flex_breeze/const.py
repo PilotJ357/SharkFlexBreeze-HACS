@@ -4,15 +4,16 @@ CONF_TRANSMITTER = "transmitter"
 CONF_FAN_ID = "fan_id"
 CONF_FAN_NAME = "fan_name"
 
-# RF timing (microseconds)
+# RF timing (microseconds) — verified from learned remote capture
 FREQ_HZ = 433_920_000
-SYNC_US = 4224
-LONG_US = 888    # bit 1
-SHORT_US = 308   # bit 0
-GAP_US = 292     # inter-symbol gap
-RESET_US = 9000  # inter-packet gap
+SYNC_US = 4400       # sync burst
+LONG_US = 920        # long pulse  = bit 0
+SHORT_US = 296       # short pulse = bit 1
+GAP_US = 296         # short gap (follows LONG pulse / bit 0)
+LONG_GAP_US = 920    # long gap  (follows SHORT pulse / bit 1)
+RESET_US = 9300      # inter-repetition gap (also follows SYNC)
 PACKET_BITS = 41
-REPEAT_COUNT = 1
+REPEAT_COUNT = 5     # repetitions of bit sequence after single SYNC burst
 
 COMMAND_SUFFIXES: dict[str, str] = {
     "power":          "aa558",

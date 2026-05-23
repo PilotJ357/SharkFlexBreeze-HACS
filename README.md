@@ -56,9 +56,9 @@ Repeat for each fan.
 ## Features
 
 - **5-speed control** — 20 / 40 / 60 / 80 / 100 %
-- **Turbo preset** — dedicated turbo mode
+- **Turbo preset** — dedicated turbo mode; automatically exits when a speed is selected
 - **Oscillation** — swing increase / decrease
-- **Direction** — rotate left / right
+- **Rotate buttons** — rotate left / rotate right as momentary button presses
 - **State restore** — survives HA restarts (assumed state)
 - **Multi-fan** — add as many fans as you have remotes; each gets its own device
 
@@ -114,21 +114,20 @@ Reverse-engineered via RTL-SDR (RTL2838) + rtl_433.
 
 | Parameter | Value |
 |-----------|-------|
-| Frequency | 433.92 MHz |
+| Frequency | 433.87 MHz (measured) |
 | Modulation | OOK PWM (ASK) |
 | Packet length | 41 bits |
-| Repeats per press | 5× |
-| Sync pulse | ~4224 µs |
-| Bit 1 (long) | ~888 µs |
-| Bit 0 (short) | ~308 µs |
-| Inter-symbol gap | ~292 µs |
-| Inter-packet reset | ~9000 µs |
+| Repeats per burst | 5× (one sync, five bit-sequence repetitions) |
+| Sync pulse | ~4400 µs |
+| Bit 0 (long pulse) | ~920 µs + ~296 µs gap |
+| Bit 1 (short pulse) | ~296 µs + ~920 µs gap |
+| Post-sync / inter-rep gap | ~9300 µs |
 
 **Packet structure:** `[ bits 0–23 : Fan ID ][ bits 24–40 : Command ]`
 
 **rtl_433 flex decoder:**
 ```
-n=fan_remote,m=OOK_PWM,s=308,l=888,r=9000,t=150,y=4224
+n=fan_remote,m=OOK_PWM,s=296,l=920,r=9300,t=150,y=4400
 ```
 
 <details>
@@ -155,7 +154,7 @@ Codes are built by concatenating the 24-bit fan ID prefix with the 17-bit comman
 
 - **State tracking is best-effort** — the fan gives no feedback over RF. If the fan is operated via its physical remote, HA's assumed state will drift and get out of sync.
 - **Power is a toggle** — one code for both on and off. If HA's state is wrong, a `turn_on` call may actually turn it off.
-- **Turbo/burst is also a toggle** — same situation: one code enters and exits burst mode. Pressing turbo while in turbo returns the fan to its previous speed automatically; the integration preserves the pre-turbo speed level in state so no additional speed commands are sent on exit.
+- **Turbo/burst is also a toggle** — same situation: one code enters and exits burst mode. Pressing turbo while in turbo returns the fan to its previous speed automatically. Setting a speed percentage while in turbo will automatically send the exit-turbo command first, then adjust speed.
 - **5 speed levels, not 4** — speed increase/decrease are relative ±1 commands; the remote has no "go to level N" command. The integration tracks assumed current level and sends the required number of presses to reach the target. If state has drifted, the delta will be wrong.
 - **Not rolling code** — static codes, replay reliably.
 - **Fan ID is not serial-derived** — hardwired in the remote at the factory; must be captured via RTL-SDR.
@@ -169,27 +168,21 @@ Codes are built by concatenating the 24-bit fan ID prefix with the 17-bit comman
 SharkFlexBreezeHACS/
 ├── hacs.json
 ├── README.md
+├── icon.png
 ├── scripts/
-│   ├── get_fan_id.sh       # capture fan ID from remote via RTL-SDR
-│   └── known_ids.json      # saved fan IDs
-├── custom_components/shark_flex_breeze/
-│   ├── codes/
-│   │   ├── fan1/           # .sub reference files (not used at runtime)
-│   │   └── fan2/
-│   ├── __init__.py
-│   ├── config_flow.py
-│   ├── const.py
-│   ├── entity.py
-│   ├── fan.py
-│   ├── manifest.json
-│   └── strings.json
-└── beta-testing/           # RF reverse engineering tools
-    ├── capture.sh
-    ├── decode.sh
-    ├── watch.sh
-    ├── watch_parser.py
-    ├── scan.sh
-    └── analyze.py
+│   └── get_fan_id.sh       # capture fan ID from remote via RTL-SDR
+└── custom_components/shark_flex_breeze/
+    ├── __init__.py
+    ├── button.py
+    ├── config_flow.py
+    ├── const.py
+    ├── entity.py
+    ├── fan.py
+    ├── known_ids.json
+    ├── manifest.json
+    ├── strings.json
+    └── translations/
+        └── en.json
 ```
 
 </details>

@@ -19,6 +19,7 @@ from .const import (
     DOMAIN,
     FREQ_HZ,
     GAP_US,
+    LONG_GAP_US,
     LONG_US,
     PACKET_BITS,
     REPEAT_COUNT,
@@ -43,14 +44,14 @@ def make_command(fan_id: str, suffix: str) -> _OOKCommand:
     hex_code = fan_id + suffix
     n = int(hex_code, 16)
     b = bin(n)[2:].zfill(44)[:PACKET_BITS]
-    single: list[int] = [SYNC_US, -GAP_US]
+    # bit 0 = LONG pulse + short gap; bit 1 = SHORT pulse + long gap
+    bits: list[int] = []
     for i, bit in enumerate(b):
-        pulse = LONG_US if bit == "1" else SHORT_US
-        gap = -RESET_US if i == PACKET_BITS - 1 else -GAP_US
-        single += [pulse, gap]
-    # All REPEAT_COUNT repetitions in one timing list so Broadlink transmits
-    # them at hardware speed (~9 ms reset gap), matching the physical remote burst.
-    return _OOKCommand(frequency=FREQ_HZ, timings=single * REPEAT_COUNT, repeat_count=0)
+        pulse = SHORT_US if bit == "1" else LONG_US
+        gap = LONG_GAP_US if bit == "1" else GAP_US
+        bits += [pulse, -(RESET_US if i == PACKET_BITS - 1 else gap)]
+    # One SYNC burst followed by REPEAT_COUNT repetitions of the bit sequence
+    return _OOKCommand(frequency=FREQ_HZ, timings=[SYNC_US, -RESET_US] + bits * REPEAT_COUNT, repeat_count=0)
 
 
 class SharkFlexBreezeEntity(Entity):
