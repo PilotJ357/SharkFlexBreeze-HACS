@@ -27,6 +27,7 @@ async def async_setup_entry(
 
 class SharkFlexBreezeFan(SharkFlexBreezeEntity, FanEntity, RestoreEntity):
     _attr_name = None
+    _attr_translation_key = "shark_flex_breeze_fan"
     _attr_speed_count = 5  # hardware has 5 speed levels
     _attr_preset_modes = PRESET_MODES
     _attr_supported_features = (

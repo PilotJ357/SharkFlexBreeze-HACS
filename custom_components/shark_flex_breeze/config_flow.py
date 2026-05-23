@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from pathlib import Path
 from typing import Any
@@ -22,6 +23,8 @@ from homeassistant.helpers.selector import (
     SelectSelectorMode,
     TextSelector,
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 from .const import (
     CONF_FAN_ID,
@@ -154,8 +157,8 @@ class SharkFlexBreezeConfigFlow(ConfigFlow, domain=DOMAIN):
             await async_send_command(
                 self.hass, self._pending[CONF_TRANSMITTER], command
             )
-        except Exception:
-            pass
+        except Exception as err:  # noqa: BLE001
+            _LOGGER.warning("Test command failed (user can retry): %s", err)
 
         return self.async_show_menu(
             step_id="test",

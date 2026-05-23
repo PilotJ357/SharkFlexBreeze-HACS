@@ -1,12 +1,14 @@
 {
   "domain": "shark_flex_breeze",
   "name": "Shark Flex Breeze",
-  "codeowners": [],
+  "codeowners": ["@PilotJ357"],
   "config_flow": true,
   "dependencies": ["radio_frequency"],
   "documentation": "https://github.com/PilotJ357/SharkFlexBreeze-HACS",
   "integration_type": "device",
   "iot_class": "assumed_state",
+  "issue_tracker": "https://github.com/PilotJ357/SharkFlexBreeze-HACS/issues",
+  "homeassistant": "2026.5.0",
   "quality_scale": "bronze",
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
